@@ -1,0 +1,6 @@
+{
+  "name": "CreatorStore",
+  "description": "A neo-brutalist marketplace for selling digital products, templates, and courses.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

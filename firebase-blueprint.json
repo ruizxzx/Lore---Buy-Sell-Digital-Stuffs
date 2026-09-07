@@ -1,0 +1,96 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing roles and public details.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 100 },
+        "username": { "type": "string", "maxLength": 50, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "bio": { "type": "string", "maxLength": 1000 },
+        "profileImage": { "type": "string", "maxLength": 1000 },
+        "role": { "type": "string", "enum": ["buyer", "creator", "admin"] },
+        "createdAt": { "type": "number" },
+        "socialLinks": { 
+          "type": "object", 
+          "properties": {
+            "twitter": { "type": "string", "maxLength": 200 },
+            "website": { "type": "string", "maxLength": 200 }
+          }
+        }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Digital product offering.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 200 },
+        "slug": { "type": "string", "maxLength": 250, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "description": { "type": "string", "maxLength": 10000 },
+        "shortDescription": { "type": "string", "maxLength": 500 },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "enum": ["USD"] },
+        "coverImage": { "type": "string", "maxLength": 1000 },
+        "category": { "type": "string", "maxLength": 50 },
+        "tags": { "type": "array", "maxLength": 10 },
+        "status": { "type": "string", "enum": ["draft", "published", "archived"] },
+        "ownerId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["title", "price", "currency", "ownerId", "status", "createdAt"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A purchase record.",
+      "type": "object",
+      "properties": {
+        "buyerId": { "type": "string", "maxLength": 128 },
+        "creatorId": { "type": "string", "maxLength": 128 },
+        "productId": { "type": "string", "maxLength": 128 },
+        "stripeSessionId": { "type": "string", "maxLength": 256 },
+        "amount": { "type": "number" },
+        "currency": { "type": "string", "maxLength": 10 },
+        "status": { "type": "string", "enum": ["pending", "paid", "refunded"] },
+        "createdAt": { "type": "number" },
+        "paidAt": { "type": "number" }
+      },
+      "required": ["buyerId", "creatorId", "productId", "amount", "status", "createdAt"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Product review left by a buyer.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "maxLength": 128 },
+        "buyerId": { "type": "string", "maxLength": 128 },
+        "rating": { "type": "number" },
+        "text": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["productId", "buyerId", "rating", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Stores user profiles."
+    },
+    "products/{productId}": {
+      "schema": "Product",
+      "description": "Stores product listings."
+    },
+    "orders/{orderId}": {
+      "schema": "Order",
+      "description": "Stores product orders."
+    },
+    "reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Stores product reviews."
+    }
+  }
+}
