@@ -10,6 +10,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "@/src/lib/firebase";
 import { useAuthStore, UserProfile } from "@/src/store/useAuthStore";
 import { Navbar } from "@/src/components/Navbar";
+import { Footer } from "@/src/components/Footer";
 import { motion } from "motion/react";
 
 // Pages
@@ -21,6 +22,8 @@ import CreatorOnboarding from "@/src/pages/CreatorOnboarding";
 import ProductCreate from "@/src/pages/ProductCreate";
 import Cart from "@/src/pages/Cart";
 import Storefront from "@/src/pages/Storefront";
+import AdminLayout from "@/src/pages/admin/AdminLayout";
+
 
 const GlassBackground = () => (
   <div className="fixed inset-0 z-[-1] overflow-hidden bg-neutral-950">
@@ -83,14 +86,17 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/explore" element={<Explore />} />
+            
             <Route path="/product/:slug" element={<ProductDetail />} />
             <Route path="/store/:username" element={<Storefront />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/admin/*" element={<AdminLayout />} />
             <Route path="/onboarding" element={<CreatorOnboarding />} />
             <Route path="/dashboard/products/new" element={<ProductCreate />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </BrowserRouter>
   );

@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/src/lib/firebase";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { useCartStore } from "@/src/store/useCartStore";
 import { Button } from "@/src/components/ui/Button";
 import { Card, CardContent } from "@/src/components/ui/Card";
 import { Download } from "lucide-react";
 
 export default function DashboardOrders() {
   const { user } = useAuthStore();
+  const clearCart = useCartStore((state) => state.clearCart);
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<Record<string, any>>({});
+  const [searchParams] = useSearchParams();
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("success") === "true") {
+      clearCart();
+    }
+  }, [searchParams, clearCart]);
 
   useEffect(() => {
     async function loadOrders() {
@@ -26,11 +36,9 @@ export default function DashboardOrders() {
         orderData.sort((a: any, b: any) => b.createdAt - a.createdAt);
         setOrders(orderData);
 
-        // Fetch product details for these orders
         const productIds = [...new Set(orderData.map(o => o.productId))];
         const productMap: Record<string, any> = {};
         for (const pid of productIds) {
-          // In production, batch this using 'in' query or similar, up to 10 at a time
           const pQuery = query(collection(db, "products"), where("__name__", "==", pid));
           const pSnap = await getDocs(pQuery);
           if (!pSnap.empty) {
@@ -38,7 +46,6 @@ export default function DashboardOrders() {
           }
         }
         setProducts(productMap);
-
       } catch (error) {
         console.error("Failed to load orders", error);
       }
@@ -47,17 +54,33 @@ export default function DashboardOrders() {
   }, [user]);
 
   const handleDownload = async (productId: string) => {
-    // In a real app, hit an API to generate a signed URL:
-    // const res = await fetch("/api/downloads/generate", { method: "POST", body: JSON.stringify({ productId }) });
-    // const { url } = await res.json();
-    // window.open(url, "_blank");
-    alert("In a full production environment, this would verify the user's order entitlement on the server and generate a signed Firebase Storage URL. (For now, see Product Dashboard for original files)");
+    if (!user) return;
+    setDownloadingId(productId);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/downloads/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Download failed");
+      
+      window.open(data.url, "_blank");
+    } catch (e: any) {
+      console.error(e);
+      alert(e.message || "Failed to download product.");
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   return (
     <div className="space-y-8">
-      <h1 className="text-4xl font-display font-black tracking-tighter text-white">My Library</h1>
-
+      <h1 className="text-4xl font-display font-black tracking-tighter text-white">Purchases</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order) => {
           const product = products[order.productId];
@@ -72,8 +95,13 @@ export default function DashboardOrders() {
                 <h3 className="font-display font-bold text-xl line-clamp-1 text-white">{product.title}</h3>
                 <p className="text-xs font-bold text-neutral-400 uppercase tracking-widest">Purchased: {new Date(order.createdAt).toLocaleDateString()}</p>
                 <div className="pt-4 flex gap-2 border-t border-neutral-800 mt-4">
-                  <Button onClick={() => handleDownload(product.id)} className="w-full mt-4">
-                    <Download className="w-4 h-4 mr-2" /> Download
+                  <Button 
+                    onClick={() => handleDownload(product.id)} 
+                    className="w-full mt-4"
+                    disabled={downloadingId === product.id}
+                  >
+                    <Download className="w-4 h-4 mr-2" /> 
+                    {downloadingId === product.id ? "Downloading..." : "Download"}
                   </Button>
                 </div>
               </CardContent>

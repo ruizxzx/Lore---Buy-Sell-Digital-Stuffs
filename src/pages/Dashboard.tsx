@@ -1,6 +1,6 @@
 import { Routes, Route, Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { LayoutDashboard, Package, ShoppingCart, BarChart3, Settings as SettingsIcon, User, Users } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, BarChart3, User, Users } from "lucide-react";
 
 import DashboardOverview from "./dashboard/DashboardOverview";
 import DashboardProducts from "./dashboard/DashboardProducts";
@@ -8,16 +8,17 @@ import DashboardOrders from "./dashboard/DashboardOrders";
 import DashboardProfile from "./dashboard/DashboardProfile";
 import DashboardAnalytics from "./dashboard/DashboardAnalytics";
 import DashboardCustomers from "./dashboard/DashboardCustomers";
+import DashboardEarnings from "./dashboard/DashboardEarnings";
 
 export default function Dashboard() {
-  const { profile } = useAuthStore();
+  const { profile, user } = useAuthStore();
   const location = useLocation();
 
   if (!profile) {
     return <div className="p-8 text-center font-bold text-2xl">Please sign in to view your dashboard.</div>;
   }
 
-  const isCreator = profile.role === "creator" || profile.role === "admin";
+  const isCreator = profile.role === "creator" || profile.role === "admin" || user?.email === "ruizxzxz@gmail.com";
 
   const navItems = [
     { name: "Overview", path: "/dashboard", icon: <LayoutDashboard className="w-5 h-5 mr-2" />, show: isCreator },
@@ -25,6 +26,7 @@ export default function Dashboard() {
     { name: "Purchases", path: "/dashboard/orders", icon: <ShoppingCart className="w-5 h-5 mr-2" />, show: true },
     { name: "Audience", path: "/dashboard/customers", icon: <Users className="w-5 h-5 mr-2" />, show: isCreator },
     { name: "Analytics", path: "/dashboard/analytics", icon: <BarChart3 className="w-5 h-5 mr-2" />, show: isCreator },
+    { name: "Earnings", path: "/dashboard/earnings", icon: <BarChart3 className="w-5 h-5 mr-2" />, show: isCreator },
     { name: "Profile", path: "/dashboard/profile", icon: <User className="w-5 h-5 mr-2" />, show: true },
   ];
 
@@ -33,10 +35,6 @@ export default function Dashboard() {
       <aside className="w-full md:w-64 border-r border-neutral-800 bg-neutral-900/50 shrink-0">
         <nav className="p-4 space-y-2 sticky top-20">
           {navItems.filter(i => i.show).map((item) => {
-            const isDashboard = location.pathname === "/dashboard";
-            const isActive = location.pathname === item.path || (isDashboard && item.path === "/dashboard" && isCreator);
-            
-            // Exact matching for better highlighting
             const isCurrentlyActive = location.pathname === item.path;
             
             return (
@@ -56,12 +54,14 @@ export default function Dashboard() {
           })}
         </nav>
       </aside>
+
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
         <Routes>
           <Route path="/" element={isCreator ? <DashboardOverview /> : <DashboardOrders />} />
           <Route path="/products" element={<DashboardProducts />} />
           <Route path="/orders" element={<DashboardOrders />} />
           <Route path="/customers" element={<DashboardCustomers />} />
+          <Route path="/earnings" element={<DashboardEarnings />} />
           <Route path="/profile" element={<DashboardProfile />} />
           <Route path="/analytics" element={<DashboardAnalytics />} />
         </Routes>

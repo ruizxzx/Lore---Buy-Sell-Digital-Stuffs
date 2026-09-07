@@ -32,7 +32,7 @@ export default function Cart() {
       
       if (data.paymentSessionId) {
         // @ts-ignore
-        const cashfree = Cashfree({ mode: "sandbox" });
+        const cashfree = Cashfree({ mode: import.meta.env.VITE_CASHFREE_ENVIRONMENT === "PRODUCTION" ? "production" : "sandbox" });
         
         cashfree.checkout({
           paymentSessionId: data.paymentSessionId,

@@ -10,6 +10,8 @@ export default function DashboardProfile() {
   const [bio, setBio] = useState(profile?.bio || "");
   const [twitter, setTwitter] = useState(profile?.twitter || "");
   const [website, setWebsite] = useState(profile?.website || "");
+  const [cashfreeVendorId, setCashfreeVendorId] = useState(profile?.cashfreeVendorId || "");
+  const [vendorStatus, setVendorStatus] = useState(profile?.vendorStatus || "NOT_STARTED");
   const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = async () => {
@@ -20,9 +22,11 @@ export default function DashboardProfile() {
         displayName,
         bio,
         twitter,
-        website
+        website,
+        cashfreeVendorId,
+        vendorStatus
       });
-      setProfile({ ...profile, displayName, bio, twitter, website } as any);
+      setProfile({ ...profile, displayName, bio, twitter, website, cashfreeVendorId, vendorStatus } as any);
       alert("Profile updated successfully!");
     } catch (e) {
       console.error(e);
@@ -83,6 +87,19 @@ export default function DashboardProfile() {
                   placeholder="https://example.com"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2 pt-6 border-t border-neutral-800">
+              <h3 className="text-xl font-bold text-white mb-4">Payout Settings</h3>
+              <label className="text-sm font-bold text-neutral-400 uppercase tracking-widest">Cashfree Vendor ID</label>
+              <input
+                type="text"
+                value={cashfreeVendorId}
+                onChange={(e) => setCashfreeVendorId(e.target.value)}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="vendor_xxxx"
+              />
+              <p className="text-xs text-neutral-500 mt-2">Used for Cashfree Easy Split payouts. Status: <span className="text-indigo-400">{vendorStatus}</span></p>
             </div>
           </div>
         )}

@@ -10,6 +10,8 @@ export interface UserProfile {
   twitter?: string;
   website?: string;
   profileImage?: string;
+  cashfreeVendorId?: string;
+  vendorStatus?: string;
   role: "buyer" | "creator" | "admin";
   createdAt: number;
 }
